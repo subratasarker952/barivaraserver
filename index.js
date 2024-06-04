@@ -121,6 +121,15 @@ async function run() {
       const result = await blogCollection.findOne(query);
       return res.send(result);
     });
+    app.get("/blogs/me/:email", async (req, res) => {
+      const email = req.params.email;
+      if(!id){
+        return res.send({message:"email not found"})
+      }
+      const query = { authorEmail: email };
+      const result = await blogCollection.find(query).toArray();
+      return res.send(result);
+    });
     app.patch("/blogs/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       if(!id){
