@@ -123,7 +123,7 @@ async function run() {
     });
     app.get("/blogs/me/:email", async (req, res) => {
       const email = req.params.email;
-      if(!id){
+      if(!email){
         return res.send({message:"email not found"})
       }
       const query = { authorEmail: email };
