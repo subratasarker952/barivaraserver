@@ -55,6 +55,13 @@ async function run() {
       const token = jwt.sign(userInfo, "secret", { expiresIn: "7d" });
       res.send({ token });
     });
+    app.get("/states",verifyToken, async (req, res) => {
+      const products = await productCollection.estimatedDocumentCount();
+      const blogs = await blogCollection.estimatedDocumentCount();
+      const reviews = await reviewCollection.estimatedDocumentCount();
+      const users = await userCollection.estimatedDocumentCount();
+      return res.send({ products, blogs, reviews, users });
+    });
 
     // products curd
     app.get("/products/:id", async (req, res) => {
