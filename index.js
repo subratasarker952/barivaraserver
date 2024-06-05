@@ -7,8 +7,8 @@ var jwt = require("jsonwebtoken");
 const port = process.env.PORT;
 
 // Middleware to parse JSON bodies
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
 // Define a simple route
 app.get("/", (req, res) => {
@@ -42,7 +42,7 @@ const verifyToken = (req, res, next) => {
 
 async function run() {
   try {
-    await client.connect();
+    client.connect();
     const digitalFurnitureDb = client.db("digitalFurnitureDb");
     const productCollection =
       digitalFurnitureDb.collection("productCollection");
@@ -59,8 +59,8 @@ async function run() {
     // products curd
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const query = { _id: new ObjectId(id) };
       const result = await productCollection.findOne(query);
@@ -68,8 +68,8 @@ async function run() {
     });
     app.get("/products/categories/:category", async (req, res) => {
       const category = req.params.category;
-      if(!category){
-        return res.send({message:"category Notfound"})
+      if (!category) {
+        return res.send({ message: "category Notfound" });
       }
       const query = { category };
       const result = await productCollection.find(query).toArray();
@@ -77,8 +77,8 @@ async function run() {
     });
     app.patch("/products/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const filter = { _id: new ObjectId(id) };
       const product = req.body;
@@ -89,8 +89,8 @@ async function run() {
     });
     app.delete("/products/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const filter = { _id: new ObjectId(id) };
       const result = await productCollection.deleteOne(filter);
@@ -103,8 +103,8 @@ async function run() {
     });
     app.post("/products", verifyToken, async (req, res) => {
       const product = req.body;
-      if(!product){
-        return res.send({message:"No data for insert"})
+      if (!product) {
+        return res.send({ message: "No data for insert" });
       }
       const result = await productCollection.insertOne(product);
       return res.send(result);
@@ -113,8 +113,8 @@ async function run() {
     // Blogs curd
     app.get("/blogs/:id", async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const query = { _id: new ObjectId(id) };
       const result = await blogCollection.findOne(query);
@@ -122,8 +122,8 @@ async function run() {
     });
     app.get("/blogs/me/:email", async (req, res) => {
       const email = req.params.email;
-      if(!email){
-        return res.send({message:"email not found"})
+      if (!email) {
+        return res.send({ message: "email not found" });
       }
       const query = { authorEmail: email };
       const result = await blogCollection.find(query).toArray();
@@ -131,8 +131,8 @@ async function run() {
     });
     app.patch("/blogs/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const filter = { _id: new ObjectId(id) };
       const blog = req.body;
@@ -143,12 +143,12 @@ async function run() {
     });
     app.delete("/blogs/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const filter = { _id: new ObjectId(id) };
       const result = await blogCollection.deleteOne(filter);
-     return res.send(result);
+      return res.send(result);
     });
     app.get("/blogs", async (req, res) => {
       const query = {};
@@ -157,8 +157,8 @@ async function run() {
     });
     app.post("/blogs", verifyToken, async (req, res) => {
       const blog = req.body;
-      if(!blog){
-        return res.send({message:"No data for insert"})
+      if (!blog) {
+        return res.send({ message: "No data for insert" });
       }
       const result = await blogCollection.insertOne(blog);
       return res.send(result);
@@ -167,8 +167,8 @@ async function run() {
     // reviews curd
     app.get("/reviews/:id", async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const query = { _id: new ObjectId(id) };
       const result = await reviewCollection.findOne(query);
@@ -176,8 +176,8 @@ async function run() {
     });
     app.get("/reviews/me/:email", async (req, res) => {
       const email = req.params.email;
-      if(!email){
-        return res.send({message:"Id invalid"})
+      if (!email) {
+        return res.send({ message: "Id invalid" });
       }
       const query = { authorEmail: email };
       const result = await reviewCollection.find(query).toArray();
@@ -185,8 +185,8 @@ async function run() {
     });
     app.patch("/reviews/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const filter = { _id: new ObjectId(id) };
       const review = req.body;
@@ -197,12 +197,12 @@ async function run() {
     });
     app.delete("/reviews/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const filter = { _id: new ObjectId(id) };
       const result = await reviewCollection.deleteOne(filter);
-       return res.send(result);
+      return res.send(result);
     });
     app.get("/reviews", async (req, res) => {
       const query = {};
@@ -211,8 +211,8 @@ async function run() {
     });
     app.post("/reviews", verifyToken, async (req, res) => {
       const review = req.body;
-      if(!review){
-        return res.send({message:"No data for insert"})
+      if (!review) {
+        return res.send({ message: "No data for insert" });
       }
       const result = await reviewCollection.insertOne(review);
       return res.send(result);
@@ -221,8 +221,8 @@ async function run() {
     // users curd
     app.get("/users/get/:id", async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const query = { _id: new ObjectId(id) };
       const result = await userCollection.findOne(query);
@@ -230,29 +230,29 @@ async function run() {
     });
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
-      if(!email){
-        return res.send({message:"Email not fond"})
+      if (!email) {
+        return res.send({ message: "Email not fond" });
       }
       const query = { email };
       const result = await userCollection.findOne(query);
-     return res.send(result);
+      return res.send(result);
     });
     app.patch("/users/:id", async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const filter = { _id: new ObjectId(id) };
       const newDoc = req.body;
       const result = await userCollection.updateOne(filter, {
         $set: newDoc,
       });
-     return res.send(result);
+      return res.send(result);
     });
     app.delete("/users/:id", async (req, res) => {
       const id = req.params.id;
-      if(!id){
-        return res.send({message:"Id invalid"})
+      if (!id) {
+        return res.send({ message: "Id invalid" });
       }
       const filter = { _id: new ObjectId(id) };
       const result = await userCollection.deleteOne(filter);
@@ -260,15 +260,15 @@ async function run() {
     });
 
     //verify admin
-    app.get("/users",verifyToken, async (req, res) => {
+    app.get("/users", verifyToken, async (req, res) => {
       const query = {};
       const result = await userCollection.find(query).toArray();
       res.send(result);
     });
     app.post("/users", async (req, res) => {
       const user = req.body;
-      if(!user){
-        return res.send({message:"Id invalid"})
+      if (!user) {
+        return res.send({ message: "Id invalid" });
       }
       const query = { email: user.email };
       const exist = await userCollection.findOne(query);
