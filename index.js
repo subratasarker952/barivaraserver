@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 var jwt = require("jsonwebtoken");
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -43,7 +43,6 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     await client.connect();
-    console.log("server connect");
     const digitalFurnitureDb = client.db("digitalFurnitureDb");
     const productCollection =
       digitalFurnitureDb.collection("productCollection");
@@ -287,6 +286,4 @@ async function run() {
 run().catch(console.dir);
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
+app.listen(port);
