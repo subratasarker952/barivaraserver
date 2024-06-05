@@ -177,7 +177,7 @@ async function run() {
     });
     app.get("/reviews/me/:email", async (req, res) => {
       const email = req.params.email;
-      if(!id){
+      if(!email){
         return res.send({message:"Id invalid"})
       }
       const query = { authorEmail: email };
