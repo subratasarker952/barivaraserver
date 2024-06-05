@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 var jwt = require("jsonwebtoken");
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -43,7 +43,6 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     await client.connect();
-    console.log("server connect");
     const digitalFurnitureDb = client.db("digitalFurnitureDb");
     const productCollection =
       digitalFurnitureDb.collection("productCollection");
@@ -121,6 +120,15 @@ async function run() {
       const result = await blogCollection.findOne(query);
       return res.send(result);
     });
+    app.get("/blogs/me/:email", async (req, res) => {
+      const email = req.params.email;
+      if(!email){
+        return res.send({message:"email not found"})
+      }
+      const query = { authorEmail: email };
+      const result = await blogCollection.find(query).toArray();
+      return res.send(result);
+    });
     app.patch("/blogs/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       if(!id){
@@ -168,9 +176,12 @@ async function run() {
     });
     app.get("/reviews/me/:email", async (req, res) => {
       const email = req.params.email;
+      if(!email){
+        return res.send({message:"Id invalid"})
+      }
       const query = { authorEmail: email };
       const result = await reviewCollection.find(query).toArray();
-      res.send(result);
+      return res.send(result);
     });
     app.patch("/reviews/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
@@ -275,6 +286,4 @@ async function run() {
 run().catch(console.dir);
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
+app.listen(port);
