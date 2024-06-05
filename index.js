@@ -177,9 +177,12 @@ async function run() {
     });
     app.get("/reviews/me/:email", async (req, res) => {
       const email = req.params.email;
+      if(!id){
+        return res.send({message:"Id invalid"})
+      }
       const query = { authorEmail: email };
       const result = await reviewCollection.find(query).toArray();
-      res.send(result);
+      return res.send(result);
     });
     app.patch("/reviews/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
