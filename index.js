@@ -55,7 +55,7 @@ async function run() {
       const token = jwt.sign(userInfo, "secret", { expiresIn: "7d" });
       res.send({ token });
     });
-    app.get("/states",verifyToken, async (req, res) => {
+    app.get("/states", verifyToken, async (req, res) => {
       const products = await productCollection.estimatedDocumentCount();
       const blogs = await blogCollection.estimatedDocumentCount();
       const reviews = await reviewCollection.estimatedDocumentCount();
@@ -64,24 +64,17 @@ async function run() {
     });
 
     // products curd
-    app.get("/products/:id", async (req, res) => {
-      const id = req.params.id;
-      if (!id) {
-        return res.send({ message: "Id invalid" });
-      }
-      const query = { _id: new ObjectId(id) };
-      const result = await productCollection.findOne(query);
-      return res.send(result);
-    });
+
     app.get("/products/email", async (req, res) => {
-      const email= req.query.email
-      if(!email){
+      const email = req.query.email;
+      if (!email) {
         return res.send({ message: "Please Login then Try" });
       }
-      const query = { authorEmail:email };
+      const query = { authorEmail: email };
       const result = await productCollection.find(query).toArray();
       return res.send(result);
     });
+
     app.get("/products/categories/:category", async (req, res) => {
       const category = req.params.category;
       if (!category) {
@@ -89,6 +82,15 @@ async function run() {
       }
       const query = { category };
       const result = await productCollection.find(query).toArray();
+      return res.send(result);
+    });
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      if (!id) {
+        return res.send({ message: "Id invalid" });
+      }
+      const query = { _id: new ObjectId(id) };
+      const result = await productCollection.findOne(query);
       return res.send(result);
     });
     app.patch("/products/:id", verifyToken, async (req, res) => {
@@ -113,11 +115,13 @@ async function run() {
       return res.send(result);
     });
     app.get("/products", async (req, res) => {
-      const searchText  = req.query.searchText;
+      const searchText = req.query.searchText;
       let result = [];
       if (searchText) {
-        result = await productCollection.find({ title: { $regex: searchText, $options: 'i' } }).toArray();
-      }else {
+        result = await productCollection
+          .find({ title: { $regex: searchText, $options: "i" } })
+          .toArray();
+      } else {
         result = await productCollection.find({}).toArray();
       }
       res.send(result);
@@ -173,10 +177,12 @@ async function run() {
       return res.send(result);
     });
     app.get("/blogs", async (req, res) => {
-      const searchText  = req.query.searchText;
+      const searchText = req.query.searchText;
       let result = [];
       if (searchText) {
-        result = await blogCollection.find({ title: { $regex: searchText, $options: 'i' } }).toArray();
+        result = await blogCollection
+          .find({ title: { $regex: searchText, $options: "i" } })
+          .toArray();
       } else {
         result = await blogCollection.find({}).toArray();
       }
@@ -232,10 +238,12 @@ async function run() {
       return res.send(result);
     });
     app.get("/reviews", async (req, res) => {
-      const searchText  = req.query.searchText;
+      const searchText = req.query.searchText;
       let result = [];
       if (searchText) {
-        result = await reviewCollection.find({ description: { $regex: searchText, $options: 'i' } }).toArray();
+        result = await reviewCollection
+          .find({ description: { $regex: searchText, $options: "i" } })
+          .toArray();
       } else {
         result = await reviewCollection.find({}).toArray();
       }
