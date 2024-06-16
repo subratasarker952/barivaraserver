@@ -105,13 +105,13 @@ async function run() {
     });
     app.get("/products", async (req, res) => {
       const searchText  = req.query.searchText;
-      let products = [];
+      let result = [];
       if (searchText) {
-        products = await productCollection.find({ title: { $regex: searchText, $options: 'i' } }).toArray();
+        result = await productCollection.find({ title: { $regex: searchText, $options: 'i' } }).toArray();
       } else {
-        products = await productCollection.find({}).toArray();
+        result = await productCollection.find({}).toArray();
       }
-      res.send(products);
+      res.send(result);
     });
 
     app.post("/products", verifyToken, async (req, res) => {
@@ -164,9 +164,14 @@ async function run() {
       return res.send(result);
     });
     app.get("/blogs", async (req, res) => {
-      const query = {};
-      const result = await blogCollection.find(query).toArray();
-      return res.send(result);
+      const searchText  = req.query.searchText;
+      let result = [];
+      if (searchText) {
+        result = await blogCollection.find({ title: { $regex: searchText, $options: 'i' } }).toArray();
+      } else {
+        result = await blogCollection.find({}).toArray();
+      }
+      res.send(result);
     });
     app.post("/blogs", verifyToken, async (req, res) => {
       const blog = req.body;
@@ -218,8 +223,13 @@ async function run() {
       return res.send(result);
     });
     app.get("/reviews", async (req, res) => {
-      const query = {};
-      const result = await reviewCollection.find(query).toArray();
+      const searchText  = req.query.searchText;
+      let result = [];
+      if (searchText) {
+        result = await reviewCollection.find({ title: { $regex: searchText, $options: 'i' } }).toArray();
+      } else {
+        result = await reviewCollection.find({}).toArray();
+      }
       res.send(result);
     });
     app.post("/reviews", verifyToken, async (req, res) => {
