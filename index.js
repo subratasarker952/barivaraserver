@@ -199,7 +199,7 @@ async function run() {
 
     // reviews curd
     app.get("/reviews/email", async (req, res) => {
-      const email = req.params.email;
+      const email = req.query.email;
       if (!email) {
         return res.send({ message: "Please login then try" });
       }
