@@ -198,6 +198,15 @@ async function run() {
     });
 
     // reviews curd
+    app.get("/reviews/email", async (req, res) => {
+      const email = req.params.email;
+      if (!email) {
+        return res.send({ message: "Id invalid" });
+      }
+      const query = { authorEmail: email };
+      const result = await reviewCollection.find(query).toArray();
+      return res.send(result);
+    });
     app.get("/reviews/:id", async (req, res) => {
       const id = req.params.id;
       if (!id) {
@@ -207,15 +216,7 @@ async function run() {
       const result = await reviewCollection.findOne(query);
       return res.send(result);
     });
-    app.get("/reviews/me/:email", async (req, res) => {
-      const email = req.params.email;
-      if (!email) {
-        return res.send({ message: "Id invalid" });
-      }
-      const query = { authorEmail: email };
-      const result = await reviewCollection.find(query).toArray();
-      return res.send(result);
-    });
+
     app.patch("/reviews/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       if (!id) {
