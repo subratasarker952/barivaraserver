@@ -73,6 +73,15 @@ async function run() {
       const result = await productCollection.findOne(query);
       return res.send(result);
     });
+    app.get("/products/email", async (req, res) => {
+      const email= req.query.email
+      if(!email){
+        return res.send({ message: "Please Login then Try" });
+      }
+      const query = { authorEmail:email };
+      const result = await productCollection.find(query).toArray();
+      return res.send(result);
+    });
     app.get("/products/categories/:category", async (req, res) => {
       const category = req.params.category;
       if (!category) {
@@ -108,7 +117,7 @@ async function run() {
       let result = [];
       if (searchText) {
         result = await productCollection.find({ title: { $regex: searchText, $options: 'i' } }).toArray();
-      } else {
+      }else {
         result = await productCollection.find({}).toArray();
       }
       res.send(result);
