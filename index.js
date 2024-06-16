@@ -97,10 +97,16 @@ async function run() {
       return res.send(result);
     });
     app.get("/products", async (req, res) => {
-      const query = {};
-      const result = await productCollection.find(query).toArray();
-      res.send(result);
+      const searchText  = req.query.searchText;
+      let products = [];
+      if (searchText) {
+        products = await productCollection.find({ title: { $regex: searchText, $options: 'i' } }).toArray();
+      } else {
+        products = await productCollection.find({}).toArray();
+      }
+      res.send(products);
     });
+
     app.post("/products", verifyToken, async (req, res) => {
       const product = req.body;
       if (!product) {
