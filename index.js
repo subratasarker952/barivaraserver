@@ -226,7 +226,7 @@ async function run() {
       const searchText  = req.query.searchText;
       let result = [];
       if (searchText) {
-        result = await reviewCollection.find({ title: { $regex: searchText, $options: 'i' } }).toArray();
+        result = await reviewCollection.find({ description: { $regex: searchText, $options: 'i' } }).toArray();
       } else {
         result = await reviewCollection.find({}).toArray();
       }
