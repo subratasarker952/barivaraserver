@@ -201,7 +201,7 @@ async function run() {
     app.get("/reviews/email", async (req, res) => {
       const email = req.params.email;
       if (!email) {
-        return res.send({ message: "Id invalid" });
+        return res.send({ message: "Please login then try" });
       }
       const query = { authorEmail: email };
       const result = await reviewCollection.find(query).toArray();
