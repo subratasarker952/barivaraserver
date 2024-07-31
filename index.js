@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 var jwt = require("jsonwebtoken");
-const port = process.env.PORT;
+const port = process.env.PORT || 8989;
 
 // Middleware to parse JSON bodies
 app.use(cors());
