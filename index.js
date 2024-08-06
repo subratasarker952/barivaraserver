@@ -12,39 +12,29 @@ const port = process.env.PORT || 3000;
 // Middleware to parse JSON bodies
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve static files
 
 // Define a simple route
 app.get("/", (req, res) => {
   res.send("Hi Developer Server Is Running");
 });
-
-// Multer configuration for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, "uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir);
-    }
+  destination: function (req, file, cb) {
+     console.log(req,file)
     cb(null, "uploads/");
   },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+  filename: function (req, file, cb) {
+    console.log(req,file)
+    cb(null, new Date.now() + file.originalname);
   },
 });
-const upload = multer({ storage: storage,fileFilter: (req, file, cb)=>{
-  const supportImages= /jpg | png/;
-  const extension= path.extname(file.originalname)
-  if(supportImages.test(extension)){
-    cb(null, true)
-  }else{
-    cb(new Error('please give Jpg / png file '))
-  }
-},
-limits:{
-  fileSize:5000000
-}
- });
+
+const upload = multer({ storage: storage });
+// const upload = multer({
+//   storage: storage,
+//   limits: {
+//     fileSize: 5000000,
+//   },
+// });
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dtcwl7u.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -90,6 +80,17 @@ async function run() {
       res.send({ properties, users });
     });
 
+    app.post("/imageUpload", upload.single("images"), async (req, res) => {
+      try {
+        // const images = req.files.map((file) => file.path);
+        // console.log(req.file, req.data);
+
+        res.status(201).json('upload success');
+      } catch (error) {
+        res.status(400).json({ error: error.message });
+      }
+    });
+
     // Properties CRUD
     app.get("/properties/email", verifyToken, async (req, res) => {
       const email = req.query.email;
@@ -118,7 +119,9 @@ async function run() {
       }
       const filter = { _id: new ObjectId(id) };
       const product = req.body;
-      const result = await propertyCollection.updateOne(filter, { $set: product });
+      const result = await propertyCollection.updateOne(filter, {
+        $set: product,
+      });
       res.send(result);
     });
 
@@ -141,7 +144,7 @@ async function run() {
         if (upazila) query.upazila = upazila;
         if (postOffice) query.postOffice = postOffice;
         if (type) query.type = type;
-        
+
         const result = await propertyCollection.find(query).toArray();
         res.send(result);
       } catch (error) {
@@ -149,13 +152,11 @@ async function run() {
       }
     });
 
-    app.post("/properties", verifyToken, upload.array("images", 6), async (req, res) => {
+    app.post("/properties", verifyToken, async (req, res) => {
       try {
         const { amenities, ...other } = req.body;
-        const images = req.files.map((file) => file.path);
         const propertyDoc = {
           ...other,
-          images,
           amenities: amenities.split(",").map((amenity) => amenity.trim()),
         };
 
