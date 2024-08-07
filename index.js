@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
 });
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, uploadsDir);
   },
   filename: function (req, file, cb) {
     cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
@@ -88,7 +88,7 @@ async function run() {
 
     app.post("/imageUpload", upload.array("images"), async (req, res) => {
       try {
-        const images = req.files.map((file) => file.path);
+        const images = req?.files?.map((file) =>(process.env.BASE_URL+'/uploads/'+ file.filename));
 
         res.status(201).json(images);
       } catch (error) {
@@ -136,6 +136,11 @@ async function run() {
         return res.status(400).send({ message: "Invalid ID" });
       }
       const filter = { _id: new ObjectId(id) };
+      const property = await propertyCollection.findOne(filter);
+      await property.images.map((image) =>
+        fs.unlink(path.join(__dirname, "uploads") + image.split("/")[2])
+      );
+
       const result = await propertyCollection.deleteOne(filter);
       res.send(result);
     });
