@@ -13,28 +13,34 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Ensure the 'uploads' directory exists
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Serve the uploads directory as a static folder
+app.use("/uploads", express.static(uploadsDir));
+
 // Define a simple route
 app.get("/", (req, res) => {
   res.send("Hi Developer Server Is Running");
 });
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-     console.log(req,file)
     cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    console.log(req,file)
-    cb(null, new Date.now() + file.originalname);
+    cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
   },
 });
 
-const upload = multer({ storage: storage });
-// const upload = multer({
-//   storage: storage,
-//   limits: {
-//     fileSize: 5000000,
-//   },
-// });
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5000000,
+  },
+});
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dtcwl7u.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -80,12 +86,11 @@ async function run() {
       res.send({ properties, users });
     });
 
-    app.post("/imageUpload", upload.single("images"), async (req, res) => {
+    app.post("/imageUpload", upload.array("images"), async (req, res) => {
       try {
-        // const images = req.files.map((file) => file.path);
-        // console.log(req.file, req.data);
+        const images = req.files.map((file) => file.path);
 
-        res.status(201).json('upload success');
+        res.status(201).json(images);
       } catch (error) {
         res.status(400).json({ error: error.message });
       }
