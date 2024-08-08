@@ -8,6 +8,13 @@ const path = require("path");
 const fs = require("fs");
 const app = express();
 const port = process.env.PORT || 3000;
+const SSLCommerzPayment = require("sslcommerz-lts");
+const uuid = require("uuid");
+
+
+const storeId = process.env.STORE_ID;
+const storePassword = process.env.STORE_PASSWORD;
+const isLive = false;
 
 // Middleware to parse JSON bodies
 app.use(cors());
@@ -88,7 +95,9 @@ async function run() {
 
     app.post("/imageUpload", upload.array("images"), async (req, res) => {
       try {
-        const images = req?.files?.map((file) =>(process.env.BASE_URL+'/uploads/'+ file.filename));
+        const images = req?.files?.map(
+          (file) => process.env.SERVER_URL + "/uploads/" + file.filename
+        );
 
         res.status(201).json(images);
       } catch (error) {
@@ -237,6 +246,124 @@ async function run() {
       }
       const result = await userCollection.insertOne({ ...user, role: "user" });
       res.send(result);
+    });
+
+    // Payment Api
+    app.patch("/payment/:id", async (req, res) => {
+      const property = req.body;
+      const id = req.params.id;
+      const tran_id = uuid.v4();
+
+      const filter = { _id: new ObjectId(id) };
+      await propertyCollection.updateOne(filter, {
+        $set: {
+          ...property,
+          tran_id: tran_id,
+        },
+      });
+
+      const data = {
+        total_amount: property.amount,
+        currency: "BDT",
+        tran_id: tran_id,
+        success_url: `${process.env.SERVER_URL}/payment/success?tran_id=${tran_id}`,
+        fail_url: `${process.env.SERVER_URL}/payment/fail?tran_id=${tran_id}`,
+        cancel_url: `${process.env.SERVER_URL}/payment/cancel?tran_id=${tran_id}`,
+        ipn_url: `${process.env.SERVER_URL}/payment/ipn`,
+        shipping_method: "Not required",
+        product_name: "Online service",
+        product_category: "Online service",
+        product_profile: "general",
+        cus_name: "",
+        cus_email: "",
+        cus_add1: "",
+        cus_add2: "",
+        cus_city: "",
+        cus_state: "",
+        cus_postcode: "",
+        cus_country: "",
+        cus_phone: "",
+        cus_fax: "",
+        ship_name: "",
+        ship_add1: "",
+        ship_add2: "",
+        ship_city: "",
+        ship_state: "",
+        ship_postcode: "",
+        ship_country: "",
+        multi_card_name: "mastercard",
+        value_a: "ref001_A",
+        value_b: "ref002_B",
+        value_c: "ref003_C",
+        value_d: "ref004_D",
+      };
+
+      const sslcommer = new SSLCommerzPayment(storeId, storePassword, isLive);
+      let url;
+      await sslcommer.init(data).then((res) => {
+        url = res.GatewayPageURL;
+      });
+      res.send({ url });
+    });
+
+    app.post("/payment/success", async (req, res) => {
+      const { tran_id } = req.query;
+      const result = await propertyCollection.updateOne(
+        { tran_id },
+        {
+          $set: {
+            paymentStatus: "paid",
+            publishStatus: "public",
+            paidAt: new Date(),
+          },
+        }
+      );
+      if (result.modifiedCount > 0) {
+        res.redirect(
+          `${process.env.CLIENT_URL}/paymentSuccess?tran_id=${tran_id}`
+        );
+      }
+    });
+
+    app.post("/payment/fail", async (req, res) => {
+      const { tran_id } = req.query;
+      const result = await propertyCollection.updateOne(
+        { tran_id },
+        {
+          $set: {
+            paymentStatus: "due",
+            publishStatus: "hide",
+            tran_id: "",
+            tryToPayAt: new Date(),
+          },
+        }
+      );
+      if (result.modifiedCount > 0) {
+        res.redirect(`${process.env.CLIENT_URL}/paymentFail`);
+      }
+    });
+    app.post("/payment/cancel", async (req, res) => {
+      const { tran_id } = req.query;
+      const result = await propertyCollection.updateOne(
+        { tran_id },
+        {
+          $set: {
+            paymentStatus: "due",
+            publishStatus: "hide",
+            tran_id: "",
+            tryToPayAt: new Date(),
+          },
+        }
+      );
+      if (result.modifiedCount > 0) {
+        res.redirect(`${process.env.CLIENT_URL}/paymentCancel`);
+      }
+    });
+    app.get("/property/:tran_id", verifyToken, async (req, res) => {
+      const tran_id = req.params.tran_id;
+      const query = { tran_id };
+      const property = await propertyCollection.findOne(query);
+      return res.send(property);
     });
   } finally {
     // Ensures that the client will close when you finish/error
