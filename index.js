@@ -11,7 +11,6 @@ const port = process.env.PORT || 3000;
 const SSLCommerzPayment = require("sslcommerz-lts");
 const uuid = require("uuid");
 
-
 const storeId = process.env.STORE_ID;
 const storePassword = process.env.STORE_PASSWORD;
 const isLive = false;
@@ -134,7 +133,7 @@ async function run() {
       const filter = { _id: new ObjectId(id) };
       const product = req.body;
       const result = await propertyCollection.updateOne(filter, {
-        $set: product,
+        $set: {...product},
       });
       res.send(result);
     });
@@ -146,10 +145,17 @@ async function run() {
       }
       const filter = { _id: new ObjectId(id) };
       const property = await propertyCollection.findOne(filter);
-      await property.images.map((image) =>
-        fs.unlink(path.join(__dirname, "uploads") + image.split("/")[2])
+      const filepaths = property?.images?.map(
+        (image) => path.join(__dirname, "uploads/") + image.split("/")[4]
       );
 
+      if (filepaths) {
+        filepaths.forEach((filepath) => {
+          try {
+            fs.unlinkSync(filepath);
+          } catch (err) {}
+        });
+      }
       const result = await propertyCollection.deleteOne(filter);
       res.send(result);
     });
@@ -274,23 +280,23 @@ async function run() {
         product_name: "Online service",
         product_category: "Online service",
         product_profile: "general",
-        cus_name: "",
-        cus_email: "",
-        cus_add1: "",
-        cus_add2: "",
-        cus_city: "",
-        cus_state: "",
-        cus_postcode: "",
-        cus_country: "",
-        cus_phone: "",
-        cus_fax: "",
-        ship_name: "",
-        ship_add1: "",
-        ship_add2: "",
-        ship_city: "",
-        ship_state: "",
-        ship_postcode: "",
-        ship_country: "",
+        cus_name: "customer name",
+        cus_email: "customer email",
+        cus_add1: "customer add1",
+        cus_add2: "customer add2",
+        cus_city: "customer city",
+        cus_state: "customer state",
+        cus_postcode: "customer postcode",
+        cus_country: "customer country",
+        cus_phone: "customer phone",
+        cus_fax: "customer fax",
+        ship_name: "ship name",
+        ship_add1: "ship add1",
+        ship_add2: "ship add2",
+        ship_city: "ship city",
+        ship_state: "ship state",
+        ship_postcode: "ship postcode",
+        ship_country: "ship country",
         multi_card_name: "mastercard",
         value_a: "ref001_A",
         value_b: "ref002_B",
