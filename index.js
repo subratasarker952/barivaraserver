@@ -162,8 +162,9 @@ async function run() {
 
     app.get("/properties", async (req, res) => {
       try {
-        const { division, district, upazila, postOffice, type } = req.query;
+        const { search, division, district, upazila, postOffice, type } = req.query;
         let query = {};
+        if (search) query.title = { $regex: search, $options: 'i' };
         if (division) query.division = division;
         if (district) query.district = district;
         if (upazila) query.upazila = upazila;
