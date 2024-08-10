@@ -133,7 +133,7 @@ async function run() {
       const filter = { _id: new ObjectId(id) };
       const product = req.body;
       const result = await propertyCollection.updateOne(filter, {
-        $set: {...product},
+        $set: { ...product },
       });
       res.send(result);
     });
@@ -162,10 +162,27 @@ async function run() {
 
     app.get("/properties", async (req, res) => {
       try {
-        const { search, division, district, upazila, postOffice, type } = req.query;
+        const {
+          minPrice,
+          maxPrice,
+          location,
+          page = 1,
+          limit = 10,
+          search,
+          division,
+          district,
+          upazila,
+          postOffice,
+          type,
+        } = req.query;
         let query = {};
-        if (search) query.title = { $regex: search, $options: 'i' };
+        if (search) query.title = { $regex: search, $options: "i" };
         if (division) query.division = division;
+        if (minPrice || maxPrice) {
+          query.price = {};
+          if (minPrice) query.price.$gte = Number(minPrice);
+          if (maxPrice) query.price.$lte = Number(maxPrice);
+        }
         if (district) query.district = district;
         if (upazila) query.upazila = upazila;
         if (postOffice) query.postOffice = postOffice;
