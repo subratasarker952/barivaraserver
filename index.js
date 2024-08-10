@@ -185,7 +185,7 @@ async function run() {
         const properties = await propertyCollection
           .find(query)
           .skip((page - 1) * limit)
-          .limit(Number(limit));
+          .limit(Number(limit)).toArray()
 
         const totalProperties = await propertyCollection.countDocuments(query);
 
