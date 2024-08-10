@@ -163,9 +163,7 @@ async function run() {
     app.get("/properties", async (req, res) => {
       try {
         const {
-          minPrice,
           maxPrice,
-          location,
           page = 1,
           limit = 10,
           search,
@@ -178,20 +176,26 @@ async function run() {
         let query = {};
         if (search) query.title = { $regex: search, $options: "i" };
         if (division) query.division = division;
-        if (minPrice || maxPrice) {
-          query.price = {};
-          if (minPrice) query.price.$gte = Number(minPrice);
-          if (maxPrice) query.price.$lte = Number(maxPrice);
-        }
+        if (maxPrice) query.price.$lte = Number(maxPrice);
         if (district) query.district = district;
         if (upazila) query.upazila = upazila;
         if (postOffice) query.postOffice = postOffice;
         if (type) query.type = type;
 
-        const result = await propertyCollection.find(query).toArray();
-        res.send(result);
+        const properties = await propertyCollection
+          .find(query)
+          .skip((page - 1) * limit)
+          .limit(Number(limit));
+
+        const totalProperties = await propertyCollection.countDocuments(query);
+
+        res.json({
+          properties,
+          totalPages: Math.ceil(totalProperties / limit),
+          currentPage: Number(page),
+        });
       } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "Server Error" });
       }
     });
 
