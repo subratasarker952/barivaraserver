@@ -181,7 +181,8 @@ async function run() {
         if (upazila) query.upazila = upazila;
         if (postOffice) query.postOffice = postOffice;
         if (type) query.type = type;
-
+        
+        
         const properties = await propertyCollection
           .find(query)
           .skip((page - 1) * limit)
